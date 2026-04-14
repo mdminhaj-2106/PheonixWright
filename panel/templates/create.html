@@ -2,18 +2,18 @@
 {% block content %}
 <h2>Provision New Identity</h2>
 <form method="post" action="/users/create" id="provisioning-form">
-    <div style="margin-bottom: 20px;">
-        <label for="name-input" style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Full Name</label>
+    <div class="form-group">
+        <label for="name-input" class="form-label">Full Name</label>
         <input name="name" id="name-input" aria-label="Full Name input" required placeholder="e.g. John Doe">
     </div>
 
-    <div style="margin-bottom: 20px;">
-        <label for="email-input" style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Corporate Email</label>
+    <div class="form-group">
+        <label for="email-input" class="form-label">Corporate Email</label>
         <input name="email" id="email-input" type="email" aria-label="Corporate Email input" required placeholder="john.doe@corp.com">
     </div>
 
-    <div style="margin-bottom: 30px;">
-        <label for="license-select" style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Initial License Payload</label>
+    <div class="form-group">
+        <label for="license-select" class="form-label">Initial License Payload</label>
         <select name="license" id="license-select" aria-label="Initial License assignment">
             <option value="none">Unassigned / None</option>
             <option value="microsoft365">Microsoft 365</option>

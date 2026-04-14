@@ -1,7 +1,9 @@
 from agent.config import PANEL_URL
 
-def password_reset(name: str, new_password: str) -> str:
-    return f"""
+class UserTasks:
+    @staticmethod
+    def get_password_reset_prompt(name: str, new_password: str) -> str:
+        return f"""
 You are an IT support agent. Your job:
 
 1. Go to {PANEL_URL}
@@ -15,8 +17,9 @@ When done, report: "Password reset complete for {name}."
 Do not navigate anywhere else. Do not create new users.
 """
 
-def conditional_create_and_license(name: str, email: str, license: str) -> str:
-    return f"""
+    @staticmethod
+    def get_conditional_create_license_prompt(name: str, email: str, license: str) -> str:
+        return f"""
 You are an IT support agent. Your job:
 
 1. Go to {PANEL_URL}

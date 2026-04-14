@@ -1,31 +1,23 @@
 import asyncio
 import os
 from browser_use import Agent
-from langchain_google_genai import ChatGoogleGenerativeAI
-from agent.config import MODEL, MAX_STEPS
+from browser_use.llm.google.chat import ChatGoogle
+from agent.config import FALLBACK_MODEL, MODEL, MAX_STEPS
 from dotenv import load_dotenv
 
-# Load secret environment variables
 load_dotenv()
 
-class LLMWrapper:
-    def __init__(self, llm, model_name, provider="google"):
-        self.llm = llm
-        self.provider = provider
-        self.model = model_name
-        self.model_name = model_name
-
-    async def ainvoke(self, *args, **kwargs):
-        return await self.llm.ainvoke(*args, **kwargs)
-
-    def invoke(self, *args, **kwargs):
-        return self.llm.invoke(*args, **kwargs)
-
 async def run_task(task: str):
-    base_llm = ChatGoogleGenerativeAI(model=MODEL)
-    llm = LLMWrapper(base_llm, MODEL, provider="google")
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("Missing GEMINI_API_KEY in environment.")
 
-    agent = Agent(task=task, llm=llm, max_steps=MAX_STEPS)
+    llm = ChatGoogle(model=MODEL, api_key=api_key)
+    fallback_llm = None
+    if FALLBACK_MODEL and FALLBACK_MODEL != MODEL:
+        fallback_llm = ChatGoogle(model=FALLBACK_MODEL, api_key=api_key)
+
+    agent = Agent(task=task, llm=llm, fallback_llm=fallback_llm, max_steps=MAX_STEPS)
     result = await agent.run()
     print("Agent output:", result)
     return result
@@ -40,4 +32,5 @@ if __name__ == "__main__":
     try:
         asyncio.run(run_task(task))
     except Exception as e:
-        print(f"Agent failed with exception: {e}")
+        import traceback
+        traceback.print_exc()

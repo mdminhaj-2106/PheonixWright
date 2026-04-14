@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Active Directory</h2>
-<form method="get" style="display: flex; gap: 10px; margin-bottom: 25px;">
-    <input name="q" value="{{ q }}" placeholder="Search by name or email..." style="margin-top: 0;">
-    <button type="submit">Search</button>
+<form method="get" id="search-form" style="display: flex; gap: 10px; margin-bottom: 25px;">
+    <input name="q" id="search-input" aria-label="Search by name or email" value="{{ q }}" placeholder="Search by name or email..." style="margin-top: 0;">
+    <button type="submit" id="search-submit" aria-label="Execute search">Search</button>
 </form>
 
-<table>
+<table id="directory-table" aria-label="User directory results">
     <thead>
         <tr>
             <th>Name</th>
@@ -17,20 +17,20 @@
     </thead>
     <tbody>
         {% for u in users %}
-        <tr>
-            <td style="font-weight: 600;">{{ u.name }}</td>
-            <td style="color: var(--text-muted);">{{ u.email }}</td>
+        <tr class="user-row" data-user-id="{{ u.id }}">
+            <td style="font-weight: 600;" aria-label="User Name">{{ u.name }}</td>
+            <td style="color: var(--text-muted);" aria-label="User Email">{{ u.email }}</td>
             <td>
-                <span class="badge {% if u.license != 'none' %}badge-active{% else %}badge-none{% endif %}">
+                <span class="badge {% if u.license != 'none' %}badge-active{% else %}badge-none{% endif %}" aria-label="Current License: {{ u.license }}">
                     {{ u.license }}
                 </span>
             </td>
-            <td><a href="/users/{{ u.id }}" class="action-link">Manage</a></td>
+            <td><a href="/users/{{ u.id }}" class="action-link" aria-label="Manage user {{ u.name }}" id="manage-link-{{ u.id }}">Manage</a></td>
         </tr>
         {% endfor %}
         {% if not users %}
         <tr>
-            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;" aria-label="No results">
                 No identities found matching your query.
             </td>
         </tr>

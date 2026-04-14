@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+aiosqlite
+sqlalchemy
+pydantic[email]
+browser-use
+playwright
+anthropic
+python-dotenv

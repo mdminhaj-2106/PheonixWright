@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Provision New Identity</h2>
+<form method="post" action="/users/create">
+    <div style="margin-bottom: 20px;">
+        <label style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Full Name</label>
+        <input name="name" required placeholder="e.g. John Doe">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Corporate Email</label>
+        <input name="email" type="email" required placeholder="john.doe@corp.com">
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <label style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Initial License Payload</label>
+        <select name="license">
+            <option value="none">Unassigned / None</option>
+            <option value="microsoft365">Microsoft 365</option>
+            <option value="google-workspace">Google Workspace</option>
+            <option value="adobe-cc">Adobe Creative Cloud</option>
+        </select>
+    </div>
+
+    <button type="submit" style="width: 100%;">Provision Access</button>
+</form>
+{% endblock %}

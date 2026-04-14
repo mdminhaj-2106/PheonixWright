@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Active Directory</h2>
+<form method="get" style="display: flex; gap: 10px; margin-bottom: 25px;">
+    <input name="q" value="{{ q }}" placeholder="Search by name or email..." style="margin-top: 0;">
+    <button type="submit">Search</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>License State</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        <tr>
+            <td style="font-weight: 600;">{{ u.name }}</td>
+            <td style="color: var(--text-muted);">{{ u.email }}</td>
+            <td>
+                <span class="badge {% if u.license != 'none' %}badge-active{% else %}badge-none{% endif %}">
+                    {{ u.license }}
+                </span>
+            </td>
+            <td><a href="/users/{{ u.id }}" class="action-link">Manage</a></td>
+        </tr>
+        {% endfor %}
+        {% if not users %}
+        <tr>
+            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                No identities found matching your query.
+            </td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="margin-bottom: 30px;">
+    <h2>{{ user.name }}</h2>
+    <p style="color: var(--text-muted); margin-bottom: 5px;">Identity String: <strong>{{ user.email }}</strong></p>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Provisioned on: {{ user.created_at }}</p>
+</div>
+
+<div style="background: rgba(0,0,0,0.2); padding: 25px; border-radius: 12px; border: 1px solid var(--glass-border);">
+    <h3 style="margin-bottom: 20px; font-size: 1.2rem;">Modify Authorizations</h3>
+    <form method="post" action="/users/{{ user.id }}/update">
+        
+        <div style="margin-bottom: 20px;">
+            <label style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase;">Seat Assignment</label>
+            <select name="license">
+                {% for l in licenses %}
+                <option value="{{ l }}" {% if l == user.license %}selected{% endif %}>{{ l }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-transform: uppercase;">Credential Reset</label>
+            <input name="password" type="text" placeholder="Leave blank to maintain current credentials">
+        </div>
+
+        <button type="submit" style="width: 100%;">Commit System Changes</button>
+    </form>
+</div>
+
+<div style="margin-top: 25px; text-align: center;">
+    <a href="/" class="action-link" style="display: inline-block;">&larr; Return to Directory</a>
+</div>
+{% endblock %}

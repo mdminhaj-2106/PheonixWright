@@ -24,13 +24,13 @@ async def user_list(request: Request, q: str = ""):
         result = await session.execute(stmt)
         users = result.scalars().all()
         
-    return templates.TemplateResponse("users.html", {
-        "request": request, "users": users, "q": q
+    return templates.TemplateResponse(request=request, name="users.html", context={
+        "users": users, "q": q
     })
 
 @app.get("/users/create", response_class=HTMLResponse)
 async def create_form(request: Request):
-    return templates.TemplateResponse("create.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="create.html")
 
 @app.post("/users/create")
 async def create_user(
@@ -58,8 +58,8 @@ async def user_detail(request: Request, user_id: int):
     if not user:
         raise HTTPException(404, "User not found")
         
-    return templates.TemplateResponse("detail.html", {
-        "request": request, "user": user,
+    return templates.TemplateResponse(request=request, name="detail.html", context={
+        "user": user,
         "licenses": ["none", "microsoft365", "google-workspace", "adobe-cc"]
     })
 

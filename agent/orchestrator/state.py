@@ -1,13 +1,14 @@
-from typing import Any, Dict, List, Optional, Tuple
-from typing_extensions import TypedDict
-from agent.planner.schemas import TaskGraph
+from __future__ import annotations
 
-class PlannerState(TypedDict, total=False):
+from typing import Any, Dict, List, Optional, Tuple, TypedDict
+
+
+class OrchestratorState(TypedDict, total=False):
     request: str
     history: List[Tuple[str, str]]
     raw_plan: str
     payload: Dict[str, Any]
-    graph_obj: Optional[TaskGraph]
+    graph_obj: Optional[Any]
     compiled_prompt: str
     error: str
     attempts: int

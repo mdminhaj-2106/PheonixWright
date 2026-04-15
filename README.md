@@ -7,16 +7,23 @@ An autonomous AI agent orchestrating automated IT administration tasks leveragin
 Natural language request
         │
         ▼
-┌─────────────────────────┐
-│   browser-use Agent     │  ← Gemini 2.0 Flash
-│   Observe → Decide → Act│  ← Playwright headless execution
-└────────────┬────────────┘
-             │  HTTP (localhost:8000)
+┌───────────────────────────────────┐
+│         ChatOrchestrator          │  ← Owns LangGraph planning workflow
+│  ┌────────┐  ┌──────────────────┐ │
+│  │ nodes/ │  │   routing.py     │ │  ← Pure node functions + retry route
+│  │ state/ │  │   state.py       │ │  ← Canonical OrchestratorState
+│  └────────┘  └──────────────────┘ │
+└────────────────┬──────────────────┘
+                 │ PlanPackage
              ▼
-┌─────────────────────────┐
-│   FastAPI Admin Panel   │  ← Asynchronous SQLAlchemy ORM 
-│   SQLite Database       │  ← /reset route for clean automation runs
-└─────────────────────────┘
+┌───────────────────────────────────┐
+│         BrowserAgentService       │  ← Gemini 2.0 Flash + Playwright
+└────────────────┬──────────────────┘
+                 │ HTTP (localhost:8000)
+                 ▼
+┌───────────────────────────────────┐
+│         FastAPI Admin Panel       │  ← Async SQLAlchemy + SQLite
+└───────────────────────────────────┘
 ```
 
 ## Setup & Deployment

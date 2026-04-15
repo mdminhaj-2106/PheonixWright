@@ -10,11 +10,9 @@ Transform PhoenixWright from a PoC (40-60% success on medium complexity) to a pr
 - Full observability & user feedback
 - Support concurrent requests (within API limits)
 
-**Implementation Duration**: 3-4 weeks (2-3 developers)
-
 ---
 
-## Phase 1: Reliability Foundation (Week 1)
+## Phase 1: Reliability Foundation
 **Goal**: Stop cascade failures, add graceful error handling
 
 ### 1.1 Add Exponential Backoff & Rate Limiting
@@ -56,7 +54,7 @@ class RetryStrategy:
 - Mock permanent error (401) → verify immediate raise
 - Verify circuit breaker trips after 3 quota hits
 
-**Effort**: 4-6 hours
+
 
 ---
 
@@ -91,8 +89,6 @@ async def validate_api_key(api_key: str, model: str) -> bool:
 - Missing key → ConfigError
 - Expired key → AuthenticationError → clear message
 - Quota exceeded → QuotaError → suggest upgrade
-
-**Effort**: 2-3 hours
 
 ---
 
@@ -144,8 +140,6 @@ except Exception as e:
 - Verify correct error message for each error type
 - Verify suggestions are actionable
 
-**Effort**: 3-4 hours
-
 ---
 
 ### 1.4 Create Custom Exception Hierarchy
@@ -188,15 +182,9 @@ class RetryExhaustedError(PhoenixWrightError):
     pass
 ```
 
-**Effort**: 1-2 hours
-
 ---
 
-**Phase 1 Total**: 14-18 hours (~2 days)
-
----
-
-## Phase 2: Complexity Handling (Week 2)
+## Phase 2: Complexity Handling
 **Goal**: Enable 6-10 step workflows, improve plan quality
 
 ### 2.1 Increase Step Limits & Add Per-Action Timeouts
@@ -242,8 +230,6 @@ PLAN_MAX_ATTEMPTS = 3  # was 2 (retry harder on plan generation)
 - Verify outcome gets 20s timeout
 - Timeout triggers RetryableError (not permanent failure)
 - Timing metrics logged
-
-**Effort**: 3-4 hours
 
 ---
 
@@ -312,7 +298,7 @@ def build_planner_prompt(request, history, policy, prior_error=""):
 - Conditional request → generates search+branch logic
 - Prior error context → plan differs from first attempt
 
-**Effort**: 5-6 hours
+
 
 ---
 
@@ -405,8 +391,6 @@ def validate(self, graph: TaskGraph) -> None:
 - Plan with orphaned nodes → validation error
 - 6-node plan → "complex" scoring
 - 3-node plan → "medium" scoring
-
-**Effort**: 4-5 hours
 
 ---
 
@@ -507,15 +491,15 @@ async def run_task_with_checkpoints(task_prompt: str, allow_resume: bool = True)
 - Verify step 1 not re-executed
 - Verify final result correct
 
-**Effort**: 6-8 hours
+
 
 ---
 
-**Phase 2 Total**: 22-27 hours (~3 days)
+---
 
 ---
 
-## Phase 3: Observability & Monitoring (Week 2-3)
+## Phase 3: Observability & Monitoring
 **Goal**: Full instrumentation for debugging + user feedback
 
 ### 3.1 Structured Logging Framework
@@ -592,8 +576,6 @@ logger.log_plan_generated(graph.intent, len(graph.nodes), graph.complexity_score
 **Tests**:
 - Verify JSON log entries have all fields
 - Parse JSON logs → extract timing metrics
-
-**Effort**: 3-4 hours
 
 ---
 
@@ -676,8 +658,6 @@ class MetricsCollector:
 - Record 10 attempts (7 success, 3 failure) → verify 70% success rate
 - Verify latency percentiles calculated correctly
 
-**Effort**: 2-3 hours
-
 ---
 
 ### 3.3 User Feedback Dashboard (CLI REPL enhancement)
@@ -719,15 +699,9 @@ if lower == "/explain-error":
     continue
 ```
 
-**Effort**: 3-4 hours
-
 ---
 
-**Phase 3 Total**: 11-15 hours (~1.5 days)
-
----
-
-## Phase 4: Testing & Validation (Week 3-4)
+## Phase 4: Testing & Validation
 **Goal**: Comprehensive test coverage, integration tests for complex workflows
 
 ### 4.1 Unit Tests for Error Handling
@@ -777,8 +751,6 @@ def test_api_quota_error_suggests_upgrade():
     with pytest.raises(ConfigError, match="upgrade plan"):
         validate_api_key(valid_key, model)  # API says quota exhausted
 ```
-
-**Effort**: 4-5 hours
 
 ---
 
@@ -832,7 +804,7 @@ async def test_plan_error_recovery():
         assert mock_invoke.call_count == 2  # Retried once
 ```
 
-**Effort**: 5-7 hours
+
 
 ---
 
@@ -878,8 +850,6 @@ async def test_concurrent_quota_requests_dont_exceed_rate_limit():
         assert all(r.success for r in results)
 ```
 
-**Effort**: 3-4 hours
-
 ---
 
 ### 4.4 End-to-End Test Suite
@@ -895,12 +865,6 @@ async def test_concurrent_quota_requests_dont_exceed_rate_limit():
 - Simple: Navigate → create user → verify in DB
 - Medium: Create user → assign license → verify DB
 - Complex: 3 users with different licenses → batch verify
-
-**Effort**: 4-5 hours
-
----
-
-**Phase 4 Total**: 20-26 hours (~3 days)
 
 ---
 
@@ -929,17 +893,11 @@ graph TD
     D3 --> D4["4.4 E2E Tests"]
 ```
 
-**Timeline** (1 developer):
-- Week 1: Phase 1 (14-18 hrs)
-- Week 2: Phase 2 (22-27 hrs) + Phase 3 start (5-7 hrs)
-- Week 3: Phase 3 finish (6-8 hrs) + Phase 4 start (8-10 hrs)
-- Week 4: Phase 4 finish (12-16 hrs)
-
-**Total**: ~85-110 hours (~3-4 weeks, 1 developer)
-
-**2-developer parallel** (~2 weeks):
-- Dev A: Phase 1 + Phase 4.1-2 (30-35 hrs)
-- Dev B: Phase 2 + Phase 3 + Phase 4.3-4 (37-45 hrs)
+**Task Sequence**:
+1. Phase 1: Reliability Foundation
+2. Phase 2: Complexity Handling
+3. Phase 3: Observability & Monitoring
+4. Phase 4: Testing & Validation
 
 ---
 

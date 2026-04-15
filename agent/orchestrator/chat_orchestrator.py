@@ -4,6 +4,9 @@ import os
 from dataclasses import dataclass
 from typing import List, Tuple
 
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langgraph.graph import END, START, StateGraph
+
 from agent.config import PLAN_MAX_ATTEMPTS, PLANNER_MODEL
 from agent.orchestrator.nodes import (
     make_compile_prompt_node,
@@ -13,6 +16,7 @@ from agent.orchestrator.nodes import (
 from agent.orchestrator.routing import plan_route
 from agent.orchestrator.state import OrchestratorState
 from agent.planner.fallback import minimal_fallback_graph
+from agent.planner.plan_prompt import build_planner_prompt
 from agent.planner.plan_types import PlanPackage
 from agent.planner.validator import TaskGraphValidator
 from agent.policy.dashboard_policy import DashboardPolicy
@@ -37,27 +41,16 @@ class ChatOrchestrator:
         self.max_attempts = max_attempts
         self._workflow_app = self._compile_workflow()
 
-    def _build_planner_llm(self):
+    def _build_planner_llm(self) -> ChatGoogleGenerativeAI | None:
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            return None
-        try:
-            from langchain_google_genai import ChatGoogleGenerativeAI
-        except Exception:
             return None
         return ChatGoogleGenerativeAI(model=self.planner_model, google_api_key=api_key, temperature=0)
 
     def _compile_workflow(self):
-        try:
-            from langgraph.graph import END, START, StateGraph
-        except Exception:
-            return None
-
         llm = self._build_planner_llm()
         if llm is None:
             return None
-
-        from agent.planner.plan_prompt import build_planner_prompt
 
         draft_node = make_draft_plan_node(llm, self.policy, build_planner_prompt)
         validate_node = make_validate_plan_node(self.validator)

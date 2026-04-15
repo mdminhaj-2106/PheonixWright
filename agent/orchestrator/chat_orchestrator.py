@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Tuple
 
-from agent.planner.decomposer import LangGraphTaskDecomposer, PlanPackage
+from agent.planner.decomposer import LangGraphTaskDecomposer
+from agent.planner.plan_types import PlanPackage
 
 
 @dataclass

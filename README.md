@@ -61,7 +61,7 @@ Natural language request
    - `/clear` clears remembered turns
    - `/exit` exits chat mode
 
-   Chat/query requests are now policy-anchored to `http://localhost:8000` and compiled into structured micro-steps before execution.
+   Chat/query requests are policy-anchored to `http://localhost:8000` and compiled into a dynamic micro-step plan (LangGraph planner with validated fallback).
 
    *Ad-hoc query prompt*
    ```bash

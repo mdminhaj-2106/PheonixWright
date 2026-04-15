@@ -8,4 +8,5 @@ pydantic[email]
 browser-use
 playwright
 langchain-google-genai
+langgraph
 python-dotenv

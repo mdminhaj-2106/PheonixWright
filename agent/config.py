@@ -6,6 +6,8 @@ ALLOWED_PANEL_PATH_PREFIXES = ["/", "/users", "/reset"]
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-2.5-flash-lite")
+PLANNER_MODEL = os.getenv("GEMINI_PLANNER_MODEL", FALLBACK_MODEL or MODEL)
 
 MAX_STEPS = 20
 PLAN_MAX_NODES = 15
+PLAN_MAX_ATTEMPTS = 2

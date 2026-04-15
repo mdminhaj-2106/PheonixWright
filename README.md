@@ -1,101 +1,105 @@
-# Phoenix Admin Support Agent
+# Phoenix Wright: Autonomous IT Administration Agent
 
-An autonomous AI agent orchestrating automated IT administration tasks leveraging **browser-use**, **Playwright**, and the **Gemini 2.0 Flash** LLM acting against a custom asynchronous FastAPI web panel.
+**Phoenix Wright** is a high-availability, agentic automation infrastructure engineered to securely orchestrate complex IT administration workflows. By bridging the cognitive planning capabilities of the **Gemini 2.0 Flash LLM** with headless browser traversal (`browser-use` & `Playwright`), Phoenix operates fully autonomously to execute stateful tasks against asynchronous FastAPI panels.
+
+---
 
 ## Architecture Pipeline
-```text
-Natural language request
-        │
-        ▼
-┌───────────────────────────────────┐
-│         ChatOrchestrator          │  ← Owns LangGraph planning workflow
-│  ┌────────┐  ┌──────────────────┐ │
-│  │ nodes/ │  │   routing.py     │ │  ← Pure node functions + retry route
-│  │ state/ │  │   state.py       │ │  ← Canonical OrchestratorState
-│  └────────┘  └──────────────────┘ │
-└────────────────┬──────────────────┘
-                 │ PlanPackage
-             ▼
-┌───────────────────────────────────┐
-│         BrowserAgentService       │  ← Gemini 2.0 Flash + Playwright
-└────────────────┬──────────────────┘
-                 │ HTTP (localhost:8000)
-                 ▼
-┌───────────────────────────────────┐
-│         FastAPI Admin Panel       │  ← Async SQLAlchemy + SQLite
-└───────────────────────────────────┘
+
+The system is built on a decoupled, deterministic agentic loop utilizing LangGraph pattern principles to enforce rigid constraints over LLM non-determinism.
+
+```mermaid
+graph TD
+    
+    A[Natural Language Request] --> B
+
+    subgraph "Logical Planning Engine - LangGraph"
+        B(ChatOrchestrator):::agent --> C{TaskGraphValidator}
+        C -- "Schema Violation (Cycle/Bounds)" --> B
+        C -- "Valid Map" --> D[PlanPackage]
+    end
+
+    D --> E(BrowserAgentService):::llm
+    
+    subgraph "Execution Layer"
+        E -- "Playwright Nav/Click/Type" --> F[(FastAPI Admin Panel - Async SQLAlchemy)]:::web
+    end
+    
+    F -. "Final UI State" .-> E
+    E --> G[State Checkpointing & Metrics]
 ```
 
-## Setup & Deployment
+## Module-Wise Engineering Rationale
 
-1. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   playwright install chromium
-   ```
+### 1. `agent/orchestrator/` — The Cognitive State Machine
+Handles the state transitions between natural language input and strict graph construction.
+- **`chat_orchestrator.py`**: The primary owner of the LangGraph workflow. It parses user intent, routes logic, and intercepts schema failure traps via LLM retries (up to `PLAN_MAX_ATTEMPTS`).
+- **`nodes.py`**: A factory for isolated, side-effect-free cognitive node operations.
+- **`state.py`**: Defines the statically typed `OrchestratorState`, functioning as the source of truth across all graph edges.
 
-2. **Environment Variables**
-   Duplicate `.env.example` into a new `.env` file and insert your Gemini API Key:
-   ```env
-   GEMINI_API_KEY=your_genai_token
-   ```
+### 2. `agent/planner/` — The Validation Sandbox
+Ensures LLM output is structurally sound before permitting network execution.
+- **`schemas.py` & `validator.py`**: Evaluates LLM intents into a `TaskGraph`. Employs automated Kahn’s Sorting algorithms to intercept infinite topological cycles. Throws isolated fault indicators like `CapacityExceededError` or `UnsupportedActionError` instead of generalized failure states.
+- **`plan_prompt.py`**: Injects aggressive boundary alignment instructions, actively restricting drifting and enforcing atomic steps for complex workflows (up to 50 nodes limit).
 
-3. **Start the Fast API Backend**
-   In terminal 1, boot the server:
-   ```bash
-   uvicorn panel.main:app --port 8000
-   ```
+### 3. Core Robustness & Telemetry infrastructure
+Built into the structural backbone for extensive operational reliability (Track B protocol framework).
+- **`agent/exceptions.py`**: Granular exception taxonomy mapped perfectly to runtime faults (`BrowserTimeoutError`, `QuotaExhaustedError`, `PlanValidationError`), discarding ambiguity gracefully.
+- **`agent/retry.py`**: An asynchronous network resilience wrapper dynamically mapping mathematically capped exponential backoff logic mapping against standard transit anomalies (502, 503, 504 codes).
+- **`agent/state_manager.py`**: Realtime `.phoenix_checkpoints/` IO caching of node-level metadata for robust audit-trails.
+- **`agent/metrics.py`**: Session retention tracking for timing variances, efficiency markers, and slash command diagnostics.
 
-4. **Prepare the Database state**
-   Before running the agent, ensuring the database is in a clean seed state is crucial.
-   ```bash
-   curl -X POST localhost:8000/reset
-   ```
+### 4. `panel/` — The Web Simulation Target
+A native, locally hosted asynchronous Python `FastAPI` instance interacting with `SQLite` under `SQLAlchemy` acting as the automation testing vector enforcing dynamic DOM payloads (Forms, Selectors, JS Rendering).
 
-5. **Run Agent Tasks with the CLI**
-   In terminal 2, use the CLI in `agent.runner`.
+---
 
-   *Chatbot mode (default)*
-   ```bash
-   python3 -m agent.runner
-   ```
-   Then type prompts directly (`you> ...`). Commands:
-   - `/help` shows chat commands
-   - `/plan` shows the decomposed micro-step plan for your last prompt
-   - `/last-run` shows the previous run summary
-   - `/retry` retries the last prepared plan
-   - `/history` shows remembered turns
-   - `/clear` clears remembered turns
-   - `/exit` exits chat mode
+## Setup & Deployment Instructions
 
-   Chat/query requests are policy-anchored to `http://localhost:8000` and compiled into a dynamic micro-step plan (LangGraph planner with validated fallback).
+### 1. Provision the Environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+playwright install chromium
+```
 
-   *Ad-hoc query prompt*
-   ```bash
-   python3 -m agent.runner query "Go to the panel and list all users with no license"
-   ```
+### 2. Configure Local Environment State
+Duplicate `.env.example` into a local `.env` and grant Gemini integration key provisioning:
+```env
+GEMINI_API_KEY=your_genai_token
+```
 
-   *Password reset workflow*
-   ```bash
-   python3 -m agent.runner password-reset --name "Alice Johnson" --new-password "new_password123"
-   ```
+### 3. Spin Up Infrastructure
+Initialize the headless testing backend on terminal 1:
+```bash
+uvicorn panel.main:app --port 8000
+```
+> **Critical Edge Testing:** Force a clean `SQLite` initial bootstrap layer using `curl -X POST localhost:8000/reset` to wipe contaminated profile data between test rounds.
 
-   *Find-or-create + assign license workflow*
-   ```bash
-   python3 -m agent.runner ensure-license --name "Dave Torres" --email "dave@corp.com" --license "adobe-cc"
-   ```
+### 4. Engage the Agent Output Subsystem
+In terminal 2, execute binary entries targeting the central `agent.runner`:
 
-   *Explicit chat mode*
-   ```bash
-   python3 -m agent.runner chat
-   ```
+#### Conversational Shell Environment (Default execution)
+```bash
+python3 -m agent.runner chat
+```
+Available Slash Directives:
+* `/help` — Contextual diagnostic mapping overview
+* `/stats` — Granular session-level compute timeline and network telemetry overview
+* `/plan` — Visual readout of the compiled micro-step graph dependencies
+* `/retry` — Instantly retrigger the previous package loop
 
-   *Interactive alias (same behavior as chat mode)*
-   ```bash
-   python3 -m agent.runner interactive
-   ```
+#### Direct Command Mode Processing
+Launch targeted operational routines seamlessly decoupled from interactive chat instances:
 
-   *Preview generated prompt without running browser automation*
-   ```bash
-   python3 -m agent.runner ensure-license --name "Dave Torres" --email "dave@corp.com" --license "adobe-cc" --dry-run
-   ```
+```bash
+# Complex ad-hoc relational requests
+python3 -m agent.runner query "Go to the panel and list all users with no license"
+
+# Enforced script workflows
+python3 -m agent.runner password-reset --name "Alice Johnson" --new-password "new_password123"
+
+# Granular workflow preview constraints (Bypass Automation / Dump AI prompt context logs)
+python3 -m agent.runner ensure-license --name "Dave Torres" --email "dave@corp.com" --license "adobe-cc" --dry-run
+```

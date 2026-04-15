@@ -14,42 +14,46 @@ graph TD
     A[Natural Language Request] --> B
 
     subgraph "Logical Planning Engine - LangGraph"
-        B(ChatOrchestrator):::agent --> C{TaskGraphValidator}
+        B("1. The Orchestrator<br>(ChatOrchestrator)"):::agent --> C{"2. The Validator<br>(TaskGraphValidator)"}
         C -- "Schema Violation (Cycle/Bounds)" --> B
         C -- "Valid Map" --> D[PlanPackage]
     end
 
-    D --> E(BrowserAgentService):::llm
+    D --> E("4. The Executioner<br>(BrowserAgentService)"):::llm
     
-    subgraph "Execution Layer"
-        E -- "Playwright Nav/Click/Type" --> F[(FastAPI Admin Panel - Async SQLAlchemy)]:::web
+    subgraph "Execution Layer & Environment"
+        E -- "Playwright Nav/Click/Type" --> F[(FastAPI Admin Panel)]:::web
+        F -. "Raw DOM/UI HTML" .-> P{{"3. The Perceiver<br>(browser-use node extraction)"}}
+        P -. "Purified Semantic Map" .-> E
     end
     
-    F -. "Final UI State" .-> E
     E --> G[State Checkpointing & Metrics]
 ```
 
-## Module-Wise Engineering Rationale
+## Module-Wise Engineering Rationale: The Four Pillars
 
-### 1. `agent/orchestrator/` — The Cognitive State Machine
-Handles the state transitions between natural language input and strict graph construction.
-- **`chat_orchestrator.py`**: The primary owner of the LangGraph workflow. It parses user intent, routes logic, and intercepts schema failure traps via LLM retries (up to `PLAN_MAX_ATTEMPTS`).
-- **`nodes.py`**: A factory for isolated, side-effect-free cognitive node operations.
-- **`state.py`**: Defines the statically typed `OrchestratorState`, functioning as the source of truth across all graph edges.
+Our architecture formally replaces unstable conversational LLM "swarms" with strict programmatic boundaries, locking the four classic agent roles into deterministic pipelines:
 
-### 2. `agent/planner/` — The Validation Sandbox
-Ensures LLM output is structurally sound before permitting network execution.
-- **`schemas.py` & `validator.py`**: Evaluates LLM intents into a `TaskGraph`. Employs automated Kahn’s Sorting algorithms to intercept infinite topological cycles. Throws isolated fault indicators like `CapacityExceededError` or `UnsupportedActionError` instead of generalized failure states.
-- **`plan_prompt.py`**: Injects aggressive boundary alignment instructions, actively restricting drifting and enforcing atomic steps for complex workflows (up to 50 nodes limit).
+### 1. The Orchestrator (`agent/orchestrator/`)
+Acts as the cognitive planner. Rather than a loosely prompted persona, this is a distinct LangGraph node (`make_draft_plan_node`). It ingests human intent, isolates contextual conversation bounds, and generates a highly structured JSON DAG. It owns the primary routing logic across the cognitive loop.
 
-### 3. Core Robustness & Telemetry infrastructure
+### 2. The Validator (`agent/planner/`)
+Replaces unreliable "AI Critics" with 100% Python determinism. It evaluates orchestrator intents into a `TaskGraph` using automated Kahn’s Sorting algorithms to intercept infinite topological cycles. It mathematically rejects invalid blueprints, throwing exact contextual faults (`CapacityExceededError` or `UnsupportedActionError`) strictly without AI hallucination.
+
+### 3. The Perceiver (`browser-use` integration)
+Handles the traditional "Observer" role natively. Rather than spinning up a separate vision LLM to stare at screenshots, it directly mounts to Chromium, strips away raw HTML/CSS noise, and extracts a purified interactive DOM bounding-box map, translating human-centric UIs into semantic data immediately.
+
+### 4. The Executioner (`agent/services/browser_agent.py`)
+Acts as the physical effector. Handed a mathematically pre-validated plan from the Validator mapping, it blindly and securely navigates the web application via Playwright without pausing to "re-think" overarching logical strategy mid-execution, drastically boosting runtime stability.
+
+### 5. Core Robustness & Telemetry infrastructure
 Built into the structural backbone for extensive operational reliability (Track B protocol framework).
 - **`agent/exceptions.py`**: Granular exception taxonomy mapped perfectly to runtime faults (`BrowserTimeoutError`, `QuotaExhaustedError`, `PlanValidationError`), discarding ambiguity gracefully.
 - **`agent/retry.py`**: An asynchronous network resilience wrapper dynamically mapping mathematically capped exponential backoff logic mapping against standard transit anomalies (502, 503, 504 codes).
 - **`agent/state_manager.py`**: Realtime `.phoenix_checkpoints/` IO caching of node-level metadata for robust audit-trails.
 - **`agent/metrics.py`**: Session retention tracking for timing variances, efficiency markers, and slash command diagnostics.
 
-### 4. `panel/` — The Web Simulation Target
+### 6. `panel/` — The Web Simulation Target
 A native, locally hosted asynchronous Python `FastAPI` instance interacting with `SQLite` under `SQLAlchemy` acting as the automation testing vector enforcing dynamic DOM payloads (Forms, Selectors, JS Rendering).
 
 ---

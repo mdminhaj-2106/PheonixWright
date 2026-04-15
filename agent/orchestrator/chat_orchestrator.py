@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Tuple
 
-from agent.planner.decomposer import LangGraphTaskDecomposer
+from agent.planner.decomposer import TaskDecomposer
 from agent.planner.plan_types import PlanPackage
 
 
@@ -15,7 +15,7 @@ class PreparedTurn:
 
 class ChatOrchestrator:
     def __init__(self) -> None:
-        self.decomposer = LangGraphTaskDecomposer()
+        self.decomposer = TaskDecomposer()
 
     def prepare_turn(self, user_input: str, history: List[Tuple[str, str]]) -> PreparedTurn:
         package = self.decomposer.build_plan(user_input, history)

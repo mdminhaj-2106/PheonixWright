@@ -1,11 +1,11 @@
-from agent.planner.decomposer import LangGraphTaskDecomposer
+from agent.planner.decomposer import TaskDecomposer
 from agent.planner.plan_types import PlanPackage
 from agent.planner.schemas import NodeAction, TaskGraph, TaskNode
 from agent.planner.validator import TaskGraphValidationError, TaskGraphValidator
 
 __all__ = [
     "PlanPackage",
-    "LangGraphTaskDecomposer",
+    "TaskDecomposer",
     "NodeAction",
     "TaskGraph",
     "TaskNode",

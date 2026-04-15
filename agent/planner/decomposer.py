@@ -13,8 +13,8 @@ from agent.planner.validator import TaskGraphValidator
 from agent.policy.dashboard_policy import DashboardPolicy
 
 
-class LangGraphTaskDecomposer:
-    """Dynamic LangGraph planner with strict validation and minimal fallback."""
+class TaskDecomposer:
+    """Dynamic task planner with strict validation and minimal fallback."""
 
     def __init__(
         self,

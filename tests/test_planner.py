@@ -1,9 +1,9 @@
-from agent.planner.decomposer import LangGraphTaskDecomposer
+from agent.planner.decomposer import TaskDecomposer
 from agent.planner.schemas import NodeAction
 
 
 def test_fallback_plan_is_anchored_when_langgraph_disabled():
-    decomposer = LangGraphTaskDecomposer(use_langgraph=False)
+    decomposer = TaskDecomposer(use_langgraph=False)
 
     package = decomposer.build_plan('Create a new user named "Henry Cavill" and give microsoft license')
     graph = package.graph
@@ -16,7 +16,7 @@ def test_fallback_plan_is_anchored_when_langgraph_disabled():
 
 
 def test_external_admin_request_is_forced_to_local_dashboard():
-    decomposer = LangGraphTaskDecomposer(use_langgraph=False)
+    decomposer = TaskDecomposer(use_langgraph=False)
 
     package = decomposer.build_plan("Open admin.microsoft.com and create a user")
 
@@ -25,7 +25,7 @@ def test_external_admin_request_is_forced_to_local_dashboard():
 
 
 def test_fallback_notes_are_explicit():
-    decomposer = LangGraphTaskDecomposer(use_langgraph=False)
+    decomposer = TaskDecomposer(use_langgraph=False)
 
     package = decomposer.build_plan("List all users")
 

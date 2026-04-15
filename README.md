@@ -54,9 +54,14 @@ Natural language request
    ```
    Then type prompts directly (`you> ...`). Commands:
    - `/help` shows chat commands
+   - `/plan` shows the decomposed micro-step plan for your last prompt
+   - `/last-run` shows the previous run summary
+   - `/retry` retries the last prepared plan
    - `/history` shows remembered turns
    - `/clear` clears remembered turns
    - `/exit` exits chat mode
+
+   Chat/query requests are now policy-anchored to `http://localhost:8000` and compiled into structured micro-steps before execution.
 
    *Ad-hoc query prompt*
    ```bash

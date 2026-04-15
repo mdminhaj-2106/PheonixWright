@@ -5,6 +5,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from agent.orchestrator.chat_orchestrator import ChatOrchestrator
 from agent.services.browser_agent import BrowserAgentService
 from agent.tasks.user_tasks import UserTasks
 
@@ -136,36 +137,24 @@ def _stringify_agent_result(result: object) -> str:
     return str(result).strip()
 
 
-def _build_chat_task_prompt(history: list[tuple[str, str]], user_input: str, history_turns: int) -> str:
-    turns = history[-history_turns:] if history_turns > 0 else []
-    if not turns:
-        return user_input
-
-    transcript_lines = [
-        "Conversation context (most recent turns):",
-    ]
-    for prev_user, prev_assistant in turns:
-        transcript_lines.append(f"User: {prev_user}")
-        transcript_lines.append(f"Assistant: {prev_assistant}")
-
-    transcript_lines.extend(
-        [
-            "",
-            "New user request:",
-            user_input,
-            "",
-            "Instruction: Use conversation context only where relevant. Prioritize the new request.",
-        ]
-    )
-    return "\n".join(transcript_lines)
-
-
 def _print_chat_help(exit_token: str) -> None:
     print("Commands:")
     print(f"  /exit or {exit_token}  End chat")
+    print("  /plan                  Show plan of last prepared request")
+    print("  /last-run              Show summary of last execution")
+    print("  /retry                 Retry last prepared request")
     print("  /clear                 Clear conversation memory")
     print("  /history               Show remembered turns")
     print("  /help                  Show command list")
+
+
+def _print_plan(orchestrator: ChatOrchestrator, user_input: str, history: list[tuple[str, str]]) -> str:
+    prepared = orchestrator.prepare_turn(user_input, history)
+    graph = prepared.package.graph
+    print(f"Plan intent: {graph.intent}")
+    for line in graph.to_step_lines():
+        print(line)
+    return prepared.prompt
 
 
 async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
@@ -174,6 +163,10 @@ async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
     print("Use '/help' for commands.")
 
     history: list[tuple[str, str]] = []
+    orchestrator = ChatOrchestrator()
+    last_prepared_prompt = ""
+    last_prepared_input = ""
+    last_run_summary = ""
 
     while True:
         try:
@@ -191,6 +184,18 @@ async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
         if lower == "/help":
             _print_chat_help(exit_token)
             continue
+        if lower == "/plan":
+            if not last_prepared_input:
+                print("No request prepared yet. Send a query first.")
+                continue
+            last_prepared_prompt = _print_plan(orchestrator, last_prepared_input, history)
+            continue
+        if lower == "/last-run":
+            if not last_run_summary:
+                print("No execution has completed yet.")
+                continue
+            print(last_run_summary)
+            continue
         if lower == "/clear":
             history.clear()
             print("Conversation memory cleared.")
@@ -204,7 +209,21 @@ async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
                 print(f"[{idx}] Agent: {a}")
             continue
 
-        task_prompt = _build_chat_task_prompt(history, user_input, history_turns)
+        current_history = history[-history_turns:] if history_turns > 0 else []
+
+        if lower == "/retry":
+            if not last_prepared_prompt:
+                print("No prepared request available to retry.")
+                continue
+            user_input = last_prepared_input
+            task_prompt = last_prepared_prompt
+            plan_intent = "retry_previous_plan"
+        else:
+            prepared = orchestrator.prepare_turn(user_input, current_history)
+            task_prompt = prepared.prompt
+            plan_intent = prepared.package.graph.intent
+            last_prepared_input = user_input
+            last_prepared_prompt = task_prompt
 
         if dry_run:
             print("\nGenerated prompt:\n")
@@ -220,6 +239,10 @@ async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
             else:
                 print("agent> Completed with no textual output.")
             history.append((user_input, assistant_text or "Completed with no textual output."))
+            last_run_summary = (
+                f"Last run intent={plan_intent}; input={user_input}; "
+                f"output={assistant_text or 'Completed with no textual output.'}"
+            )
         except Exception:
             import traceback
 
@@ -264,6 +287,10 @@ async def main() -> None:
     task_prompt = _build_prompt(args)
     if not task_prompt:
         parser.error("No prompt provided. Pass text, --prompt-file, or pipe input to stdin.")
+
+    if args.command == "query":
+        orchestrator = ChatOrchestrator()
+        task_prompt = orchestrator.prepare_turn(task_prompt, []).prompt
 
     if args.dry_run:
         print(task_prompt)

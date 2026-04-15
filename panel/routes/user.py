@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from panel.controllers.user import get_all_users, create_user_db, get_user_by_id, update_user_db
+from panel.controllers.user import get_all_users, create_user_db, get_user_by_id, update_user_db, delete_user_db
 from panel.database import reset_db
 
 router = APIRouter()
@@ -51,6 +51,13 @@ async def update_user(
         raise HTTPException(404, "User not found")
             
     return RedirectResponse(f"/users/{user_id}", status_code=303)
+
+@router.post("/users/{user_id}/delete")
+async def delete_user(user_id: int):
+    success = await delete_user_db(user_id)
+    if not success:
+        raise HTTPException(404, "User not found")
+    return RedirectResponse("/", status_code=303)
 
 @router.post("/reset")
 async def reset():

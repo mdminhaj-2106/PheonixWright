@@ -38,3 +38,13 @@ async def update_user_db(user_id: int, license: str, password: str = None):
             await session.commit()
             return user
         return None
+
+async def delete_user_db(user_id: int):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User).where(User.id == user_id))
+        user = result.scalars().first()
+        if user:
+            await session.delete(user)
+            await session.commit()
+            return True
+        return False

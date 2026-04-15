@@ -19,8 +19,10 @@ class RetryStrategy:
             try:
                 return await fn(*args, **kwargs)
             except Exception as exc:
-                if attempt == self.max_retries or not self.is_transient_error(exc):
+                if not self.is_transient_error(exc):
                     raise
+                if attempt == self.max_retries:
+                    raise RetryExhaustedError(f"All {self.max_retries} retries consumed") from exc
                 delay = min(self.base_delay * (2 ** attempt) + random.uniform(0, 0.5), self.max_delay)
                 await asyncio.sleep(delay)
         raise RetryExhaustedError(f"All {self.max_retries} retries consumed")

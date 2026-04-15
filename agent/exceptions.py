@@ -44,3 +44,11 @@ class StagnationError(PhoenixWrightError):
 class RetryExhaustedError(PhoenixWrightError):
     """Retry attempts exceeded."""
     pass
+
+class UnsupportedActionError(PlanValidationError):
+    """Requested action is not supported by the system schema."""
+    pass
+
+class CapacityExceededError(PlanValidationError):
+    """Task requires more nodes than the configured maximum."""
+    pass

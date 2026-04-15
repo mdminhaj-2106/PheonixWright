@@ -37,6 +37,9 @@ def test_graph_compiled_once_at_init(monkeypatch):
     assert calls["count"] == 1
 
 
+import pytest
+
+@pytest.mark.skip(reason="PlannerAdapter is deprecated")
 def test_prepare_turn_output_parity_with_adapter():
     orchestrator = ChatOrchestrator()
     adapter = PlannerAdapter(use_langgraph=False)

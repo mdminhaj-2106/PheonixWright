@@ -4,7 +4,7 @@ from agent.planner.schemas import NodeAction, TaskGraph
 from agent.policy.dashboard_policy import DashboardPolicy
 
 
-from agent.exceptions import PlanValidationError
+from agent.exceptions import PlanValidationError, UnsupportedActionError, CapacityExceededError
 
 class TaskGraphValidationError(PlanValidationError):
     pass
@@ -17,6 +17,13 @@ class TaskGraphValidator:
     def validate(self, graph: TaskGraph) -> None:
         import logging
         logger = logging.getLogger(__name__)
+
+        for note in graph.notes:
+            note_upper = note.upper()
+            if "ERROR: CAPACITY EXCEEDED" in note_upper:
+                raise CapacityExceededError("Plan exceeds standard maximum node capacity constraints.")
+            if "ERROR: UNSUPPORTED ACTION" in note_upper:
+                raise UnsupportedActionError("Requested action is structurally unsupported by the dashboard.")
 
         if not graph.nodes:
             raise TaskGraphValidationError("Plan graph is empty")

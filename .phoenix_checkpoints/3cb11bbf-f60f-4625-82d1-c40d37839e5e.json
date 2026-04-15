@@ -1,0 +1,9 @@
+{
+  "session_id": "3cb11bbf-f60f-4625-82d1-c40d37839e5e",
+  "user_input": "Delete henry, hannah, alice and revoke all licences from Yuji, Eren and grant Microsoft license to Ben",
+  "plan_intent": "delete multiple users, revoke licenses, and grant a license",
+  "status": "complete",
+  "error": null,
+  "started_at": 1776279646.1590369,
+  "completed_at": 1776279897.282039
+}

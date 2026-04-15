@@ -12,6 +12,7 @@ class NodeAction(str, Enum):
     FILL_CREATE_USER_FORM = "fill_create_user_form"
     SUBMIT_CREATE_FORM = "submit_create_form"
     OPEN_USER_DETAIL = "open_user_detail"
+    DELETE_USER = "delete_user"
     SET_LICENSE = "set_license"
     SET_PASSWORD = "set_password"
     SUBMIT_USER_UPDATE = "submit_user_update"

@@ -45,15 +45,45 @@ Natural language request
    curl -X POST localhost:8000/reset
    ```
 
-5. **Deploy the Agent Tasks**
-   In terminal 2, execute the runner specifying the command payloads defined in `agent/tasks.py`.
-   
-   *Example 1: The Password Reset loop*
+5. **Run Agent Tasks with the CLI**
+   In terminal 2, use the CLI in `agent.runner`.
+
+   *Chatbot mode (default)*
    ```bash
-   python -m agent.runner "$(python -c "from agent.tasks import password_reset; print(password_reset('Alice Johnson', 'new_password123'))")"
+   python3 -m agent.runner
    ```
-   
-   *Example 2: The Complex Conditional Loop*
+   Then type prompts directly (`you> ...`). Commands:
+   - `/help` shows chat commands
+   - `/history` shows remembered turns
+   - `/clear` clears remembered turns
+   - `/exit` exits chat mode
+
+   *Ad-hoc query prompt*
    ```bash
-   python -m agent.runner "$(python -c "from agent.tasks import conditional_create_and_license; print(conditional_create_and_license('Dave Torres', 'dave@corp.com', 'adobe-cc'))")"
+   python3 -m agent.runner query "Go to the panel and list all users with no license"
+   ```
+
+   *Password reset workflow*
+   ```bash
+   python3 -m agent.runner password-reset --name "Alice Johnson" --new-password "new_password123"
+   ```
+
+   *Find-or-create + assign license workflow*
+   ```bash
+   python3 -m agent.runner ensure-license --name "Dave Torres" --email "dave@corp.com" --license "adobe-cc"
+   ```
+
+   *Explicit chat mode*
+   ```bash
+   python3 -m agent.runner chat
+   ```
+
+   *Interactive alias (same behavior as chat mode)*
+   ```bash
+   python3 -m agent.runner interactive
+   ```
+
+   *Preview generated prompt without running browser automation*
+   ```bash
+   python3 -m agent.runner ensure-license --name "Dave Torres" --email "dave@corp.com" --license "adobe-cc" --dry-run
    ```

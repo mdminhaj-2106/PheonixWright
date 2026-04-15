@@ -44,3 +44,36 @@ class TaskGraph:
             else:
                 lines.append(f"{idx}. [{node.action.value}] {node.title}")
         return lines
+
+    @property
+    def complexity_score(self) -> str:
+        n = len(self.nodes)
+        if n <= 2:  return "simple"
+        if n <= 5:  return "medium"
+        return "complex"
+
+    def has_cycles(self) -> bool:
+        """Topological sort (Kahn's algorithm) — returns True if a cycle exists."""
+        in_degree = {node.id: 0 for node in self.nodes}
+        adj = {node.id: [] for node in self.nodes}
+        
+        for node in self.nodes:
+            for dep in node.depends_on:
+                if dep in adj:
+                    adj[dep].append(node.id)
+                    if node.id in in_degree:
+                        in_degree[node.id] += 1
+                        
+        queue = [nid for nid, degree in in_degree.items() if degree == 0]
+        visited_count = 0
+        
+        while queue:
+            curr = queue.pop(0)
+            visited_count += 1
+            for neighbor in adj.get(curr, []):
+                if neighbor in in_degree:
+                    in_degree[neighbor] -= 1
+                    if in_degree[neighbor] == 0:
+                        queue.append(neighbor)
+                        
+        return visited_count != len(self.nodes)

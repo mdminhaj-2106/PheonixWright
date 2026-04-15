@@ -8,10 +8,20 @@ MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-pro")
 FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-2.5-flash")
 PLANNER_MODEL = os.getenv("GEMINI_PLANNER_MODEL", FALLBACK_MODEL or MODEL)
 
-MAX_STEPS = 20
-PLAN_MAX_NODES = 15
-PLAN_MAX_ATTEMPTS = 2
+MAX_STEPS = 50
+PLAN_MAX_NODES = 20
+PLAN_MAX_ATTEMPTS = 3
 
+ACTION_TIMEOUTS: dict[str, int] = {
+    "navigate":               15,
+    "search_user":            10,
+    "fill_create_user_form":   8,
+    "submit_create_form":     10,
+    "set_license":             8,
+    "set_password":            8,
+    "submit_user_update":     10,
+    "verify_outcome":         20,
+}
 RETRY_CONFIG = {
     "max_retries": 5,
     "base_delay_seconds": 1.0,

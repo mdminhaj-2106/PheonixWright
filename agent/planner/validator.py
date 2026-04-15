@@ -15,6 +15,9 @@ class TaskGraphValidator:
         self.policy = policy or DashboardPolicy()
 
     def validate(self, graph: TaskGraph) -> None:
+        import logging
+        logger = logging.getLogger(__name__)
+
         if not graph.nodes:
             raise TaskGraphValidationError("Plan graph is empty")
 
@@ -36,3 +39,8 @@ class TaskGraphValidator:
                 url = node.params.get("url", "")
                 if not self.policy.is_allowed_url(url):
                     raise TaskGraphValidationError(f"Disallowed navigation url in node {node.id}: {url}")
+
+        if graph.has_cycles():
+            raise TaskGraphValidationError("Plan contains a dependency cycle")
+
+        logger.info("Plan complexity: %s (%d nodes)", graph.complexity_score, len(graph.nodes))

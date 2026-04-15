@@ -8,6 +8,19 @@ from dotenv import load_dotenv
 from agent.orchestrator.chat_orchestrator import ChatOrchestrator
 from agent.services.browser_agent import BrowserAgentService
 from agent.tasks.user_tasks import UserTasks
+from agent.state_manager import ExecutionState
+from agent.logging_config import configure_logging
+from agent.metrics import MetricsCollector, TaskMetrics
+from agent.cli_commands import handle_slash_command
+import time
+from agent.exceptions import (
+    ConfigError,
+    QuotaExhaustedError,
+    BrowserTimeoutError,
+    PlanValidationError,
+    RetryExhaustedError,
+    PhoenixWrightError
+)
 
 load_dotenv()
 
@@ -157,7 +170,7 @@ def _print_plan(orchestrator: ChatOrchestrator, user_input: str, history: list[t
     return prepared.prompt
 
 
-async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
+async def _run_chat(exit_token: str, dry_run: bool, history_turns: int, metrics: MetricsCollector) -> None:
     print("PhoenixWright chat mode")
     print(f"Type your query and press Enter. Use '/exit' or '{exit_token}' to quit.")
     print("Use '/help' for commands.")
@@ -181,32 +194,23 @@ async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
         lower = user_input.lower()
         if lower in {"/exit", exit_token.lower()}:
             break
-        if lower == "/help":
-            _print_chat_help(exit_token)
+        
+        if handle_slash_command(
+            lower,
+            metrics=metrics,
+            history=history,
+            orchestrator=orchestrator,
+            last_prepared_input=last_prepared_input,
+            last_run_summary=last_run_summary,
+            exit_token=exit_token,
+        ):
             continue
+
         if lower == "/plan":
             if not last_prepared_input:
                 print("No request prepared yet. Send a query first.")
                 continue
             last_prepared_prompt = _print_plan(orchestrator, last_prepared_input, history)
-            continue
-        if lower == "/last-run":
-            if not last_run_summary:
-                print("No execution has completed yet.")
-                continue
-            print(last_run_summary)
-            continue
-        if lower == "/clear":
-            history.clear()
-            print("Conversation memory cleared.")
-            continue
-        if lower == "/history":
-            if not history:
-                print("No remembered turns yet.")
-                continue
-            for idx, (q, a) in enumerate(history, start=1):
-                print(f"[{idx}] You: {q}")
-                print(f"[{idx}] Agent: {a}")
             continue
 
         current_history = history[-history_turns:] if history_turns > 0 else []
@@ -218,12 +222,15 @@ async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
             user_input = last_prepared_input
             task_prompt = last_prepared_prompt
             plan_intent = "retry_previous_plan"
+            node_count = getattr(metrics, "_last_node_count", 0)
         else:
             prepared = orchestrator.prepare_turn(user_input, current_history)
             task_prompt = prepared.prompt
             plan_intent = prepared.package.graph.intent
             last_prepared_input = user_input
             last_prepared_prompt = task_prompt
+            node_count = len(prepared.package.graph.nodes)
+            metrics._last_node_count = node_count
 
         if dry_run:
             print("\nGenerated prompt:\n")
@@ -231,8 +238,16 @@ async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
             print()
             continue
 
+        state = ExecutionState.create(user_input, plan_intent)
+        state.mark_running()
+        
+        start_time = time.time()
+        success = False
+
         try:
             result = await _run_prompt(task_prompt)
+            state.mark_complete()
+            success = True
             assistant_text = _stringify_agent_result(result)
             if assistant_text:
                 print(f"agent> {assistant_text}")
@@ -243,10 +258,35 @@ async def _run_chat(exit_token: str, dry_run: bool, history_turns: int) -> None:
                 f"Last run intent={plan_intent}; input={user_input}; "
                 f"output={assistant_text or 'Completed with no textual output.'}"
             )
-        except Exception:
-            import traceback
-
-            traceback.print_exc()
+        except QuotaExhaustedError as e:
+            metrics._last_error = str(e)
+            state.mark_error(e)
+            print(f"\n❌ API quota exceeded. Retry after {e.retry_after}s\n")
+        except BrowserTimeoutError as e:
+            metrics._last_error = str(e)
+            state.mark_error(e)
+            print(f"\n⏱️  Timeout during [{e.action}] after {e.seconds}s\n")
+        except PlanValidationError as e:
+            metrics._last_error = str(e)
+            state.mark_error(e)
+            print(f"\n🚨 Plan validation failed: {e}\n")
+        except RetryExhaustedError as e:
+            metrics._last_error = str(e)
+            state.mark_error(e)
+            print(f"\n🔄 Retry budget exhausted: {e}\n")
+        except PhoenixWrightError as e:
+            metrics._last_error = str(e)
+            state.mark_error(e)
+            print(f"\n⚠️  Agent error: {e}\n")
+        except Exception as e:
+            metrics._last_error = str(e)
+            state.mark_error(e)
+            import logging
+            logging.getLogger(__name__).error("Unexpected error", exc_info=True)
+            print(f"\n⚠️  Unexpected: {type(e).__name__}: {str(e)[:120]}\n")
+            
+        dur = time.time() - start_time
+        metrics.record(TaskMetrics(intent=plan_intent, success=success, duration_s=dur, node_count=node_count))
 
 
 def _legacy_prompt_from_argv(argv: list[str]) -> str:
@@ -261,7 +301,17 @@ def _legacy_prompt_from_argv(argv: list[str]) -> str:
     return " ".join(argv).strip()
 
 
+async def _validate_startup() -> None:
+    try:
+        BrowserAgentService.validate_api_key()
+    except ConfigError as e:
+        print(f"\n❌ Configuration error: {e}\n")
+        sys.exit(1)
+
+
 async def main() -> None:
+    await _validate_startup()
+    configure_logging()
     parser = _build_parser()
     legacy_prompt = _legacy_prompt_from_argv(sys.argv[1:])
 
@@ -277,7 +327,8 @@ async def main() -> None:
         args = argparse.Namespace(command="chat", exit_token="exit", history_turns=6, dry_run=args.dry_run)
 
     if args.command in {"chat", "interactive"}:
-        await _run_chat(args.exit_token, args.dry_run, args.history_turns)
+        metrics = MetricsCollector()
+        await _run_chat(args.exit_token, args.dry_run, args.history_turns, metrics)
         return
 
     if args.command is None:
@@ -300,10 +351,25 @@ async def main() -> None:
         result = await _run_prompt(task_prompt)
         rendered = _stringify_agent_result(result)
         print("Agent output:", rendered if rendered else result)
-    except Exception:
-        import traceback
-
-        traceback.print_exc()
+    except QuotaExhaustedError as e:
+        print(f"\n❌ API quota exceeded. Retry after {e.retry_after}s\n")
+        sys.exit(1)
+    except BrowserTimeoutError as e:
+        print(f"\n⏱️  Timeout during [{e.action}] after {e.seconds}s\n")
+        sys.exit(1)
+    except PlanValidationError as e:
+        print(f"\n🚨 Plan validation failed: {e}\n")
+        sys.exit(1)
+    except RetryExhaustedError as e:
+        print(f"\n🔄 Retry budget exhausted: {e}\n")
+        sys.exit(1)
+    except PhoenixWrightError as e:
+        print(f"\n⚠️  Agent error: {e}\n")
+        sys.exit(1)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error("Unexpected error", exc_info=True)
+        print(f"\n⚠️  Unexpected: {type(e).__name__}: {str(e)[:120]}\n")
         sys.exit(1)
 
 

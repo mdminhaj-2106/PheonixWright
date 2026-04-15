@@ -1,14 +1,16 @@
 import os
 from browser_use import Agent
+from agent.exceptions import ConfigError
 from browser_use.llm.google.chat import ChatGoogle
-from agent.config import FALLBACK_MODEL, MODEL, MAX_STEPS
+from agent.config import FALLBACK_MODEL, MODEL, MAX_STEPS, RETRY_CONFIG
+from agent.retry import RetryStrategy
 
 class BrowserAgentService:
     @staticmethod
     def get_agent(task_prompt: str) -> Agent:
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            raise ValueError("Missing GEMINI_API_KEY in environment.")
+            raise ConfigError("Missing GEMINI_API_KEY in environment.")
 
         llm = ChatGoogle(model=MODEL, api_key=api_key)
         fallback_llm = None
@@ -20,5 +22,9 @@ class BrowserAgentService:
     @staticmethod
     async def run_task(task_prompt: str):
         agent = BrowserAgentService.get_agent(task_prompt)
-        result = await agent.run()
-        return result
+        retry_strategy = RetryStrategy(
+            max_retries=RETRY_CONFIG["max_retries"],
+            base_delay=RETRY_CONFIG["base_delay_seconds"],
+            max_delay=RETRY_CONFIG["max_delay_seconds"]
+        )
+        return await retry_strategy.execute_with_retry(agent.run)

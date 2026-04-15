@@ -11,3 +11,9 @@ PLANNER_MODEL = os.getenv("GEMINI_PLANNER_MODEL", FALLBACK_MODEL or MODEL)
 MAX_STEPS = 20
 PLAN_MAX_NODES = 15
 PLAN_MAX_ATTEMPTS = 2
+
+RETRY_CONFIG = {
+    "max_retries": 5,
+    "base_delay_seconds": 1.0,
+    "max_delay_seconds": 60.0,
+}

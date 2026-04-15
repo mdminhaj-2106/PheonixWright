@@ -4,7 +4,9 @@ from agent.planner.schemas import NodeAction, TaskGraph
 from agent.policy.dashboard_policy import DashboardPolicy
 
 
-class TaskGraphValidationError(ValueError):
+from agent.exceptions import PlanValidationError
+
+class TaskGraphValidationError(PlanValidationError):
     pass
 
 

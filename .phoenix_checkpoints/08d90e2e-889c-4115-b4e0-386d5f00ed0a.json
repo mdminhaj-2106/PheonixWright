@@ -1,0 +1,9 @@
+{
+  "session_id": "08d90e2e-889c-4115-b4e0-386d5f00ed0a",
+  "user_input": "For users Alice, Bob, Carol, and David:",
+  "plan_intent": "Identify specified users",
+  "status": "complete",
+  "error": null,
+  "started_at": 1776320083.151295,
+  "completed_at": 1776320151.650344
+}

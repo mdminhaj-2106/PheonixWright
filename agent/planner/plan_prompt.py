@@ -40,6 +40,7 @@ def build_planner_prompt(
         "Error handling:",
         "- If a user requests an action impossible to perform (e.g., action not in allowed schema), write 'ERROR: UNSUPPORTED ACTION' in notes.",
         "- If the request requires more nodes than the allocated max, write 'ERROR: CAPACITY EXCEEDED' in notes.",
+        "- If the request contains logical conditionals (IF, ELSE) or loops (FOR each user), do NOT break them down into static atomic nodes. Instead, map the entire logical block to a single 'dynamic_routine' node with the full literal conversational instruction inside `params={'instruction': '...'}`.",
         "",
         "Example (3-node plan):",
         '{',

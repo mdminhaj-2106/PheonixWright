@@ -12,6 +12,7 @@ class NodeAction(str, Enum):
     FILL_CREATE_USER_FORM = "fill_create_user_form"
     SUBMIT_CREATE_FORM = "submit_create_form"
     OPEN_USER_DETAIL = "open_user_detail"
+    DYNAMIC_ROUTINE = "dynamic_routine"
     DELETE_USER = "delete_user"
     SET_LICENSE = "set_license"
     SET_PASSWORD = "set_password"
@@ -39,11 +40,18 @@ class TaskGraph:
     def to_step_lines(self) -> List[str]:
         lines: List[str] = []
         for idx, node in enumerate(self.nodes, start=1):
-            param_view = ", ".join(f"{k}={v}" for k, v in node.params.items())
-            if param_view:
-                lines.append(f"{idx}. [{node.action.value}] {node.title} ({param_view})")
+            if node.action == NodeAction.DYNAMIC_ROUTINE:
+                instruction = node.params.get("instruction", "")
+                lines.append(f"{idx}. [dynamic_routine] {node.title}")
+                lines.append(f"   INSTRUCTION: {instruction}")
+                if node.success_criteria:
+                    lines.append(f"   SUCCESS: {node.success_criteria}")
             else:
-                lines.append(f"{idx}. [{node.action.value}] {node.title}")
+                param_view = ", ".join(f"{k}={v}" for k, v in node.params.items())
+                if param_view:
+                    lines.append(f"{idx}. [{node.action.value}] {node.title} ({param_view})")
+                else:
+                    lines.append(f"{idx}. [{node.action.value}] {node.title}")
         return lines
 
     @property

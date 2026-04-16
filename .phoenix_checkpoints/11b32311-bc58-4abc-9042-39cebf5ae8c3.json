@@ -1,0 +1,9 @@
+{
+  "session_id": "11b32311-bc58-4abc-9042-39cebf5ae8c3",
+  "user_input": "- Create the user with email <name>@company.com",
+  "plan_intent": "conditionally create user",
+  "status": "complete",
+  "error": null,
+  "started_at": 1776326351.984482,
+  "completed_at": 1776326418.5681632
+}

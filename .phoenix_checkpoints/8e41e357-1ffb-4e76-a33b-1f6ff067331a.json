@@ -1,0 +1,9 @@
+{
+  "session_id": "8e41e357-1ffb-4e76-a33b-1f6ff067331a",
+  "user_input": "Execute the following workflow:",
+  "plan_intent": "Acknowledge missing workflow and navigate to dashboard",
+  "status": "complete",
+  "error": null,
+  "started_at": 1776328763.470335,
+  "completed_at": 1776328787.464548
+}

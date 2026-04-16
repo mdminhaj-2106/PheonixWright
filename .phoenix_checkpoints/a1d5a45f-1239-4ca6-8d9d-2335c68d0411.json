@@ -1,0 +1,9 @@
+{
+  "session_id": "a1d5a45f-1239-4ca6-8d9d-2335c68d0411",
+  "user_input": "- Assign google license",
+  "plan_intent": "Assign google license to user Zara",
+  "status": "running",
+  "error": null,
+  "started_at": 1776326435.242761,
+  "completed_at": null
+}

@@ -59,6 +59,7 @@ def make_compile_prompt_node(policy: DashboardPolicy) -> Callable[[OrchestratorS
             history_lines.append(f"Turn {idx} user: {user_turn}")
             history_lines.append(f"Turn {idx} agent: {agent_turn}")
 
+        total_steps = len(graph.nodes)
         sections: list[str] = [
             "You are PhoenixWright admin automation agent.",
             f"Hard boundary: Operate ONLY inside {policy.allowed_origin}.",
@@ -68,7 +69,12 @@ def make_compile_prompt_node(policy: DashboardPolicy) -> Callable[[OrchestratorS
             f"User intent: {graph.intent}",
             f"Original request: {graph.user_request}",
             "",
-            "Execution plan (follow in order, respecting dependencies):",
+            f"MANDATORY EXECUTION CHECKLIST — {total_steps} steps total.",
+            f"You MUST execute ALL {total_steps} steps below in order before calling done.",
+            "Do NOT call done after completing only part of the plan. Each step is required.",
+            "If a step fails, note the failure and continue to the next step — do not stop early.",
+            "",
+            "Steps (execute in order):",
             *graph.to_step_lines(),
         ]
         if graph.notes:
@@ -78,10 +84,11 @@ def make_compile_prompt_node(policy: DashboardPolicy) -> Callable[[OrchestratorS
         sections.extend(
             [
                 "",
-                "Completion requirements:",
-                "1. Provide a concise outcome summary.",
+                "Completion requirements (only after ALL steps above are done):",
+                "1. Provide a concise outcome summary covering ALL steps.",
                 "2. Include key fields changed (name, email, license, password if generated).",
-                "3. Mention any failure point with exact step id.",
+                "3. Mention any failure point with exact step number.",
+                "4. Confirm whether retries or fallbacks were triggered.",
             ]
         )
         return {"compiled_prompt": "\n".join(sections)}

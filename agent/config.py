@@ -21,6 +21,7 @@ ACTION_TIMEOUTS: dict[str, int] = {
     "set_password":            8,
     "submit_user_update":     10,
     "delete_user":            10,
+    "dynamic_routine":       120,
     "verify_outcome":         20,
 }
 RETRY_CONFIG = {

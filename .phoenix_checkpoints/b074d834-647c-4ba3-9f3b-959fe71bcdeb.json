@@ -1,0 +1,9 @@
+{
+  "session_id": "b074d834-647c-4ba3-9f3b-959fe71bcdeb",
+  "user_input": "- Reset their password to a strong random value",
+  "plan_intent": "conditionally reset passwords for multiple users",
+  "status": "complete",
+  "error": null,
+  "started_at": 1776325997.163636,
+  "completed_at": 1776326136.5109272
+}

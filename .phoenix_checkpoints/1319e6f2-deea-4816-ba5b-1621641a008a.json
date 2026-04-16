@@ -1,0 +1,9 @@
+{
+  "session_id": "1319e6f2-deea-4816-ba5b-1621641a008a",
+  "user_input": "Handle the following workflow end-to-end:",
+  "plan_intent": "Access the PhoenixWright admin dashboard",
+  "status": "running",
+  "error": null,
+  "started_at": 1776327762.262251,
+  "completed_at": null
+}

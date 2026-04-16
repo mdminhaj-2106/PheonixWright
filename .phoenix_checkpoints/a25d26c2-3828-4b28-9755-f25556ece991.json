@@ -1,9 +1,0 @@
-{
-  "session_id": "a25d26c2-3828-4b28-9755-f25556ece991",
-  "user_input": "- Search each user",
-  "plan_intent": "Search each user mentioned in the context",
-  "status": "running",
-  "error": null,
-  "started_at": 1776321509.0419729,
-  "completed_at": null
-}

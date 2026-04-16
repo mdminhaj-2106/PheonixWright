@@ -1,9 +1,0 @@
-{
-  "session_id": "e75d114a-4681-4cbd-a931-2874164efaae",
-  "user_input": "add users of \"Yuji Itadori\", \"Eren Yeager\", \"Aizen Sosuke\" and give them microsoft, adobe and google license respectively and revoke Alice's license and delete hannah and change henry's licence to Google",
-  "plan_intent": "add Yuji Itadori and Eren Yeager, revoke Alice's license, and change Henry's license to Google",
-  "status": "complete",
-  "error": null,
-  "started_at": 1776277386.383053,
-  "completed_at": 1776277632.1739788
-}

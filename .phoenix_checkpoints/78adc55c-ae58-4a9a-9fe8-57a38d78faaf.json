@@ -1,9 +1,0 @@
-{
-  "session_id": "78adc55c-ae58-4a9a-9fe8-57a38d78faaf",
-  "user_input": "1. For users Alice, Bob, and Zara:",
-  "plan_intent": "Locate users Alice, Bob, and Zara",
-  "status": "running",
-  "error": null,
-  "started_at": 1776320460.0377228,
-  "completed_at": null
-}

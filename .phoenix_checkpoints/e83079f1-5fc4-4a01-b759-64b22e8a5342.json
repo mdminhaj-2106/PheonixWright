@@ -1,9 +1,0 @@
-{
-  "session_id": "e83079f1-5fc4-4a01-b759-64b22e8a5342",
-  "user_input": "Execute the following workflow: for users Liam, Noah, and Olivia create each user with email <name>@company.com and assign google license, then upgrade Liam to microsoft, upgrade Noah to adobe, and reset Olivia\u2019s password, then change Noah\u2019s license from adobe to microsoft and reset Liam\u2019s password only if it has not been set already, then attempt to create Liam again with the same email (should detect duplicate), and finally ensure only one instance of each user exists and all users have microsoft license, and provide final state, conflicts detected, and any retries or skipped steps.",
-  "plan_intent": "Execute complex user management workflow with creation, updates, license changes, password resets, and duplicate handling",
-  "status": "running",
-  "error": null,
-  "started_at": 1776329102.832257,
-  "completed_at": null
-}

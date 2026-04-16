@@ -1,9 +1,0 @@
-{
-  "session_id": "65635820-6c38-40ba-bbca-5165ff7fd485",
-  "user_input": "1. For users Liam, Noah, and Olivia:",
-  "plan_intent": "Identify target users for batch operation",
-  "status": "running",
-  "error": null,
-  "started_at": 1776328649.505523,
-  "completed_at": null
-}

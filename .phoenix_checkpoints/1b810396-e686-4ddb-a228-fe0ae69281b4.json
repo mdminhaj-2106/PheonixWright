@@ -1,9 +1,0 @@
-{
-  "session_id": "1b810396-e686-4ddb-a228-fe0ae69281b4",
-  "user_input": "- Create each user with email <name>@company.com",
-  "plan_intent": "Create users with custom email format",
-  "status": "running",
-  "error": null,
-  "started_at": 1776328896.547786,
-  "completed_at": null
-}

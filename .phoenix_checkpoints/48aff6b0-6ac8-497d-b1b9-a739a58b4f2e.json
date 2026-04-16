@@ -1,9 +1,0 @@
-{
-  "session_id": "48aff6b0-6ac8-497d-b1b9-a739a58b4f2e",
-  "user_input": "Handle the following workflow end-to-end:",
-  "plan_intent": "Demonstrate a full end-to-end user lifecycle (create, update, delete)",
-  "status": "complete",
-  "error": null,
-  "started_at": 1776320303.292944,
-  "completed_at": 1776320446.831637
-}

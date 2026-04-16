@@ -1,9 +1,0 @@
-{
-  "session_id": "eb9fae7f-e812-466d-a547-f34245ef46e2",
-  "user_input": "- Upgrade their license to microsoft",
-  "plan_intent": "conditionally upgrade user licenses to microsoft",
-  "status": "complete",
-  "error": null,
-  "started_at": 1776326140.1147451,
-  "completed_at": 1776326255.668283
-}

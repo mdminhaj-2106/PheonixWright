@@ -1,9 +1,0 @@
-{
-  "session_id": "a568b61f-21e8-4872-ac65-a1e9dd696fbd",
-  "user_input": "1. For users Alice, Bob, and Zara:",
-  "plan_intent": "process multiple users",
-  "status": "complete",
-  "error": null,
-  "started_at": 1776328407.383001,
-  "completed_at": 1776328525.051879
-}

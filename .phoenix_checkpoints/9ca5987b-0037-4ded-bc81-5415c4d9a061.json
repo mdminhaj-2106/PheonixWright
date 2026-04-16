@@ -1,9 +1,0 @@
-{
-  "session_id": "9ca5987b-0037-4ded-bc81-5415c4d9a061",
-  "user_input": "1. For users Alice, Bob, and Zara:",
-  "plan_intent": "process multiple users with a dynamic routine",
-  "status": "complete",
-  "error": null,
-  "started_at": 1776325762.878911,
-  "completed_at": 1776325886.073805
-}

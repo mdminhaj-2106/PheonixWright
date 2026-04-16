@@ -1,9 +1,0 @@
-{
-  "session_id": "07689b1f-9ff5-4c50-9527-a60ee6e6d127",
-  "user_input": "For users Alice, Bob, Carol, and David:",
-  "plan_intent": "Open user detail pages for Alice, Bob, Carol, and David",
-  "status": "running",
-  "error": null,
-  "started_at": 1776319903.751689,
-  "completed_at": null
-}

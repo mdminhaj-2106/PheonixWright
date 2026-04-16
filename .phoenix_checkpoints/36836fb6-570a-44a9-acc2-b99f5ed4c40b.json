@@ -1,9 +1,0 @@
-{
-  "session_id": "36836fb6-570a-44a9-acc2-b99f5ed4c40b",
-  "user_input": "1. For users Alice, Bob, and Zara:",
-  "plan_intent": "Perform actions for multiple users (Alice, Bob, Zara)",
-  "status": "running",
-  "error": null,
-  "started_at": 1776326992.47103,
-  "completed_at": null
-}

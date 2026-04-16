@@ -1,9 +1,0 @@
-{
-  "session_id": "a1e00049-d97d-47f9-964a-7427eb095f83",
-  "user_input": "1. For users Liam, Noah, and Olivia:",
-  "plan_intent": "process multiple users",
-  "status": "complete",
-  "error": null,
-  "started_at": 1776328790.121013,
-  "completed_at": 1776328890.385181
-}

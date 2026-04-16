@@ -1,9 +1,0 @@
-{
-  "session_id": "4f40e4a4-0e8b-46b8-9206-1de5771a5869",
-  "user_input": "- If the user exists:",
-  "plan_intent": "View details for existing users Bob and Carol",
-  "status": "running",
-  "error": null,
-  "started_at": 1776320182.35493,
-  "completed_at": null
-}

@@ -1,9 +1,0 @@
-{
-  "session_id": "9dca09d6-46ac-419e-b248-82146badb130",
-  "user_input": "- IF the user does NOT exist:",
-  "plan_intent": "Handle conditional logic for non-existent users",
-  "status": "complete",
-  "error": null,
-  "started_at": 1776326264.942862,
-  "completed_at": 1776326336.509268
-}

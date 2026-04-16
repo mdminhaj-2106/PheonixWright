@@ -1,9 +1,0 @@
-{
-  "session_id": "14ba1910-537b-4bf7-acd9-fb08c463851c",
-  "user_input": "Handle the following workflow end-to-end:",
-  "plan_intent": "Initialize dashboard access",
-  "status": "complete",
-  "error": null,
-  "started_at": 1776321308.706385,
-  "completed_at": 1776321338.715395
-}

@@ -209,4 +209,5 @@ __marimo__/
 .env/
 .vscode/
 panel/pheonix_wright.db
-.pheonix_checkpoints/
+.phoenix_checkpoints/
+checkpoints/
